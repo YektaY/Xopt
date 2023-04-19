@@ -59,12 +59,14 @@ class Xopt:
         vocs: VOCS = None,
         options: XoptOptions = None,
         data: pd.DataFrame = None,
+        save: bool = False,
     ):
         """
         Initialize Xopt object using either a config dictionary or explicitly
 
         Args:
-            config: dict, or YAML or JSON str or file. This overrides all other arguments.
+            config: dict, or YAML or JSON str or file.
+            This overrides all other arguments.
 
             generator: Generator object
             evaluator: Evaluator object
@@ -103,6 +105,9 @@ class Xopt:
         self._ix_last = len(self.data)  # index of last sample generated
         self._is_done = False
         self.n_unfinished_futures = 0
+
+        # save state of generator after each step
+        self.save_option = save
 
         # check internals
         self.check_components()
@@ -205,6 +210,10 @@ class Xopt:
         if self.is_done:
             logger.debug("Xopt is done, will not step.")
             return
+
+        # save current generator state
+        if self.save_option:
+            self._generator.save_state()
 
         # get number of candidates to generate
         if self.options.asynch:
@@ -388,7 +397,8 @@ class Xopt:
 
     def __repr__(self):
         """
-        Returns infor about the Xopt object, including the YAML representation without data.
+        Returns infor about the Xopt object,
+        including the YAML representation without data.
         """
         return f"""
             Xopt

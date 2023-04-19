@@ -1,3 +1,4 @@
+import json
 import logging
 from abc import ABC, abstractmethod
 from typing import Type, TypeVar
@@ -46,6 +47,7 @@ class Generator(ABC):
         self._is_done = False
         self._data = pd.DataFrame()
         self._check_options(self._options)
+        self._saved_states = {}
 
     @abstractmethod
     def generate(self, n_candidates) -> pd.DataFrame:
@@ -97,3 +99,24 @@ class Generator(ABC):
     @property
     def options(self):
         return self._options
+
+    def save_state(self, step):
+        """
+        Save the current state of the generator.
+
+        Saves the current properites of the generator class in a dictionary.
+
+
+        Parameters
+        ----------
+        step : int
+        """
+        self._saved_states[step] = {}
+
+    def print_states(self):
+        """
+        copy the saved states of the generator to a json file,
+        saved_generator_states.json.
+        """
+        with open("saved_generator_states.json", "w", encoding="utf-8") as output_file:
+            json.dump(self._saved_states, output_file, ensure_ascii=False, indent=4)
