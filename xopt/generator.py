@@ -22,6 +22,12 @@ class GeneratorOptions(XoptBaseModel):
         extra = "forbid"
         allow_mutation = True
 
+    def to_dict(self):
+        """
+        Serialize the options to a dictionary.
+        """
+        return self.dict()
+
 
 _GeneratorOptions = TypeVar("_GeneratorOptions", bound=GeneratorOptions)
 
@@ -47,7 +53,7 @@ class Generator(ABC):
         self._is_done = False
         self._data = pd.DataFrame()
         self._check_options(self._options)
-        self._saved_states = {}
+        self._saved_states = []
 
     @abstractmethod
     def generate(self, n_candidates) -> pd.DataFrame:
@@ -100,23 +106,19 @@ class Generator(ABC):
     def options(self):
         return self._options
 
-    def save_state(self, step):
+    def save_state(self):
         """
         Save the current state of the generator.
-
-        Saves the current properites of the generator class in a dictionary.
-
-
-        Parameters
-        ----------
-        step : int
         """
-        self._saved_states[step] = {}
+        self._saved_states.append(self._options.to_dict())
 
-    def print_states(self):
+    def print_states(self, clear_saved_flag):
         """
         copy the saved states of the generator to a json file,
         saved_generator_states.json.
         """
         with open("saved_generator_states.json", "w", encoding="utf-8") as output_file:
             json.dump(self._saved_states, output_file, ensure_ascii=False, indent=4)
+
+        if clear_saved_flag:
+            del self._saved_states[:]

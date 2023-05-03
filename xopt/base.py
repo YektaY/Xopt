@@ -77,7 +77,7 @@ class Xopt:
         """
         logger.info("Initializing Xopt object")
 
-        # if config is provided, load it and re-init. Otherwise, init normally.
+        # if cig is provided, load it and re-init. Otherwise, init normally.
         if config is not None:
             self.__init__(**parse_config(config))
             # TODO: Allow overrides
@@ -242,6 +242,7 @@ class Xopt:
             self.evaluate_data(new_samples)
 
         # dump data to file if specified
+        self._generator.save_state()
         self.dump_state()
 
     def process_futures(self):
@@ -471,6 +472,7 @@ def xopt_kwargs_from_dict(config: dict) -> dict:
     generator_type, generator_options = get_generator_and_defaults(
         config["generator"].pop("name")
     )
+
     # TODO: use version number in some way
     if "version" in config["generator"].keys():
         config["generator"].pop("version")
@@ -508,6 +510,7 @@ def state_to_dict(X, include_data=True):
         "generator": {
             "name": X.generator.alias,
             **json.loads(X.generator.options.json()),
+            "histroy": X._generator._saved_states,
         },
         "evaluator": json.loads(X.evaluator.json()),
         "vocs": json.loads(X.vocs.json()),
