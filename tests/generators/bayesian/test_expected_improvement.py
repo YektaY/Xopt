@@ -20,9 +20,9 @@ class TestExpectedImprovement:
         gen = ExpectedImprovementGenerator(
             vocs=TEST_VOCS_BASE,
         )
-        gen.optimization_options.raw_samples = 1
-        gen.optimization_options.num_restarts = 1
-        gen.acquisition_options.monte_carlo_samples = 1
+        gen.numerical_optimizer.n_raw_samples = 1
+        gen.numerical_optimizer.n_restarts = 1
+        gen.n_monte_carlo_samples = 1
         gen.data = TEST_VOCS_DATA
 
         candidate = gen.generate(1)
@@ -37,9 +37,9 @@ class TestExpectedImprovement:
         gen = ExpectedImprovementGenerator(
             vocs=test_vocs,
         )
-        gen.optimization_options.raw_samples = 1
-        gen.optimization_options.num_restarts = 1
-        gen.acquisition_options.monte_carlo_samples = 1
+        gen.numerical_optimizer.n_raw_samples = 1
+        gen.numerical_optimizer.n_restarts = 1
+        gen.n_monte_carlo_samples = 1
         gen.data = TEST_VOCS_DATA
 
         candidate = gen.generate(1)
@@ -50,34 +50,14 @@ class TestExpectedImprovement:
         gen = ExpectedImprovementGenerator(
             vocs=TEST_VOCS_BASE,
         )
-        gen.optimization_options.raw_samples = 1
-        gen.optimization_options.num_restarts = 1
-        gen.acquisition_options.monte_carlo_samples = 1
+        gen.numerical_optimizer.n_raw_samples = 1
+        gen.numerical_optimizer.n_restarts = 1
+        gen.n_monte_carlo_samples = 1
 
         xopt = Xopt(generator=gen, evaluator=evaluator, vocs=TEST_VOCS_BASE)
 
         # initialize with single initial candidate
         xopt.random_evaluate(3)
-
-        # now use bayes opt
-        for _ in range(1):
-            xopt.step()
-
-    def test_in_xopt_w_proximal(self):
-        evaluator = Evaluator(function=xtest_callable)
-        gen = ExpectedImprovementGenerator(
-            vocs=TEST_VOCS_BASE,
-        )
-        gen.optimization_options.raw_samples = 1
-        gen.optimization_options.num_restarts = 1
-        gen.acquisition_options.monte_carlo_samples = 1
-        gen.acquisition_options.proximal_lengthscales = [1.0, 1.0]
-        gen.data = TEST_VOCS_DATA
-
-        xopt = Xopt(generator=gen, evaluator=evaluator, vocs=TEST_VOCS_BASE)
-
-        # initialize with single initial candidate
-        xopt.step()
 
         # now use bayes opt
         for _ in range(1):

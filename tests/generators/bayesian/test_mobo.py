@@ -2,7 +2,6 @@ from copy import deepcopy
 
 import numpy as np
 import pandas as pd
-import pytest
 
 from xopt.base import Xopt
 from xopt.evaluator import Evaluator
@@ -23,26 +22,11 @@ class TestMOBOGenerator:
         evaluator = Evaluator(function=evaluate_TNK)
         reference_point = {"y1": 1.5, "y2": 1.5}
 
-        # test check options
-        options = MOBOGenerator(vocs=tnk_vocs, reference_point=reference_point)
+        gen = MOBOGenerator(vocs=tnk_vocs, reference_point=reference_point)
+        gen = deepcopy(gen)
+        gen.n_monte_carlo_samples = 20
 
-        bad_options = deepcopy(options)
-        bad_options.optimization_options.raw_samples = 5
-        bad_options.acquisition_options.monte_carlo_samples = 10
-        bad_options.acquisition_options.proximal_lengthscales = [1.0, 1.0, 1.0]
-
-        with pytest.raises(ValueError):
-            MOBOGenerator(**bad_options.dict())
-
-        options = MOBOGenerator(vocs=tnk_vocs, reference_point=reference_point)
-        base_options = deepcopy(options)
-        base_options.acquisition_options.monte_carlo_samples = 20
-
-        proximal_biasing = deepcopy(options)
-        proximal_biasing.optimization_options.num_restarts = 1  # required
-        proximal_biasing.acquisition_options.proximal_lengthscales = [1.0, 1.0]
-
-        for ele in [base_options, proximal_biasing]:
+        for ele in [gen]:
             generator = MOBOGenerator(vocs=tnk_vocs, **ele.dict())
             X = Xopt(generator=generator, evaluator=evaluator, vocs=tnk_vocs)
             X.random_evaluate(3)

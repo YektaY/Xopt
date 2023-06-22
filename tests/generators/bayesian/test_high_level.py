@@ -17,7 +17,7 @@ class TestHighLevel:
         test_vocs.constraints = {}
         ucb_gen = UpperConfidenceBoundGenerator(vocs=test_vocs)
         ucb_gen.beta = 0.0
-        ucb_gen.acquisition_options.monte_carlo_samples = 512
+        ucb_gen.n_monte_carlo_samples = 512
         # add data
         data = pd.DataFrame({"x1": [0.0, 1.0], "x2": [0.0, 1.0], "y1": [1.0, -10.0]})
         ucb_gen.add_data(data)
@@ -43,11 +43,10 @@ class TestHighLevel:
         generator:
             name: mobo
             reference_point: {y1: 1.5, y2: 1.5}
-            optimization_options:
-                num_restarts: 1
-                raw_samples: 2
-            acquisition_options:
-                proximal_lengthscales: [1.5, 1.5]
+            numerical_optimizer:
+                name: LBFGS
+                n_restarts: 1
+                n_raw_samples: 2
 
         evaluator:
             function: xopt.resources.test_functions.tnk.evaluate_TNK
@@ -71,9 +70,10 @@ class TestHighLevel:
             generator:
                 name: mobo
                 reference_point: {y1: 1.5, y2: 1.5}
-                optimization_options:
-                    num_restarts: 2
-                    raw_samples: 2
+                numerical_optimizer:
+                    name: LBFGS
+                    n_restarts: 2
+                    n_raw_samples: 2
             evaluator:
                 function: xopt.resources.test_functions.tnk.evaluate_TNK
             vocs:
@@ -93,11 +93,10 @@ class TestHighLevel:
                 generator:
                     name: mobo
                     reference_point: {y1: 1.5, y2: 1.5}
-                    optimization_options:
-                        num_restarts: 1
-                        raw_samples: 2
-                    acquisition_options:
-                        proximal_lengthscales: [1.5, 1.5]
+                    numerical_optimizer:
+                        name: LBFGS
+                        n_restarts: 1
+                        n_raw_samples: 2
 
                 evaluator:
                     function: xopt.resources.test_functions.tnk.evaluate_TNK
@@ -120,7 +119,7 @@ class TestHighLevel:
         X2 = Xopt(config=config)
 
         assert X2.generator.vocs.variable_names == ["x1", "x2"]
-        assert X2.generator.optimization_options.num_restarts == 1
+        assert X2.generator.numerical_optimizer.n_restarts == 1
 
         import os
 
