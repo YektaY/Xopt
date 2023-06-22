@@ -20,9 +20,9 @@ class TestUpperConfidenceBoundGenerator:
         gen = UpperConfidenceBoundGenerator(
             vocs=TEST_VOCS_BASE,
         )
-        gen.optimization_options.raw_samples = 1
-        gen.optimization_options.num_restarts = 1
-        gen.acquisition_options.monte_carlo_samples = 1
+        gen.numerical_optimizer.n_raw_samples = 1
+        gen.numerical_optimizer.n_restarts = 1
+        gen.n_monte_carlo_samples = 1
         gen.data = TEST_VOCS_DATA
 
         candidate = gen.generate(1)
@@ -38,9 +38,9 @@ class TestUpperConfidenceBoundGenerator:
 
         if torch.cuda.is_available():
             gen.use_cuda = True
-            gen.optimization_options.raw_samples = 1
-            gen.optimization_options.num_restarts = 1
-            gen.acquisition_options.monte_carlo_samples = 1
+            gen.numerical_optimizer.n_raw_samples = 1
+            gen.numerical_optimizer.n_restarts = 1
+            gen.n_monte_carlo_samples = 1
             gen.data = TEST_VOCS_DATA
 
             candidate = gen.generate(1)
@@ -52,9 +52,9 @@ class TestUpperConfidenceBoundGenerator:
         gen = UpperConfidenceBoundGenerator(
             vocs=test_vocs,
         )
-        gen.optimization_options.raw_samples = 1
-        gen.optimization_options.num_restarts = 1
-        gen.acquisition_options.monte_carlo_samples = 1
+        gen.numerical_optimizer.n_raw_samples = 1
+        gen.numerical_optimizer.n_restarts = 1
+        gen.n_monte_carlo_samples = 1
         gen.data = TEST_VOCS_DATA
 
         candidate = gen.generate(1)
@@ -65,28 +65,9 @@ class TestUpperConfidenceBoundGenerator:
         gen = UpperConfidenceBoundGenerator(
             vocs=TEST_VOCS_BASE,
         )
-        gen.optimization_options.raw_samples = 1
-        gen.optimization_options.num_restarts = 1
-        gen.acquisition_options.monte_carlo_samples = 1
-
-        X = Xopt(generator=gen, evaluator=evaluator, vocs=TEST_VOCS_BASE)
-
-        # initialize with single initial candidate
-        X.random_evaluate(3)
-
-        # now use bayes opt
-        for _ in range(1):
-            X.step()
-
-    def test_in_xopt_w_proximal(self):
-        evaluator = Evaluator(function=xtest_callable)
-        gen = UpperConfidenceBoundGenerator(
-            vocs=TEST_VOCS_BASE,
-        )
-        gen.optimization_options.raw_samples = 1
-        gen.optimization_options.num_restarts = 1
-        gen.acquisition_options.monte_carlo_samples = 1
-        gen.acquisition_options.proximal_lengthscales = [1.0, 1.0]
+        gen.numerical_optimizer.n_raw_samples = 1
+        gen.numerical_optimizer.n_restarts = 1
+        gen.n_monte_carlo_samples = 1
 
         X = Xopt(generator=gen, evaluator=evaluator, vocs=TEST_VOCS_BASE)
 

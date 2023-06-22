@@ -9,7 +9,6 @@ from botorch.acquisition import (
     GenericMCObjective,
     qUpperConfidenceBound,
 )
-from botorch.optim import optimize_acqf
 from pydantic import Field, validator
 
 from xopt.generators.bayesian.custom_botorch.constrained_acqusition import (
@@ -74,6 +73,17 @@ class MultiFidelityGenerator(MOBOGenerator):
 
         # apply callable function to get costs
         return self.cost_function(f_data[..., self.fidelity_variable_index]).sum()
+
+    def get_acquisition(self, model):
+        """
+        Returns a function that can be used to evaluate the acquisition function
+        """
+        if model is None:
+            raise ValueError("model cannot be None")
+
+        # get base acquisition function
+        acq = self._get_acquisition(model)
+        return acq
 
     def _get_acquisition(self, model):
         """
@@ -172,13 +182,10 @@ class MultiFidelityGenerator(MOBOGenerator):
             )
         ).T
 
-        result, out = optimize_acqf(
-            acq_function=max_fidelity_c_posterior_mean,
-            bounds=fixed_bounds,
-            q=1,
-            raw_samples=self.optimization_options.raw_samples * 5,
-            num_restarts=self.optimization_options.num_restarts * 5,
+        result = self.numerical_optimizer.optimize(
+            max_fidelity_c_posterior_mean, fixed_bounds, 1
         )
+
         vnames = deepcopy(self.vocs.variable_names)
         del vnames[self.fidelity_variable_index]
         df = pd.DataFrame(result.detach().cpu().numpy(), columns=vnames)
