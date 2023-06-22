@@ -1,4 +1,3 @@
-import pandas as pd
 import torch
 from botorch.acquisition import qExpectedImprovement
 
@@ -14,7 +13,7 @@ from xopt.vocs import VOCS
 class ExpectedImprovementGenerator(BayesianGenerator):
     alias = "expected_improvement"
     __doc__ = (
-        """Implements Bayeisan Optimization using the Upper Confidence Bound
+        """Implements Bayeisan Optimization using the Expected Improvement
         acquisition function"""
         + f"{format_option_descriptions(BayesianOptions())}"
     )
@@ -45,12 +44,8 @@ class ExpectedImprovementGenerator(BayesianGenerator):
         return BayesianOptions()
 
     def _get_acquisition(self, model):
-        valid_data = self.data[
-            pd.unique(self.vocs.variable_names + self.vocs.output_names)
-        ].dropna()
-        objective_data = self.vocs.objective_data(valid_data, "")
-
-        best_f = torch.tensor(objective_data.max(), **self._tkwargs)
+        objective_data = self.vocs.objective_data(self.data, "").dropna()
+        best_f = -torch.tensor(objective_data.min(), **self._tkwargs)
 
         qEI = qExpectedImprovement(
             model,
@@ -59,10 +54,10 @@ class ExpectedImprovementGenerator(BayesianGenerator):
             objective=self._get_objective(),
         )
 
-        cqUCB = ConstrainedMCAcquisitionFunction(
+        cqEI = ConstrainedMCAcquisitionFunction(
             model,
             qEI,
             self._get_constraint_callables(),
         )
 
-        return cqUCB
+        return cqEI
