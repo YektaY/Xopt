@@ -312,6 +312,11 @@ class Xopt:
         if self.vocs is None:
             raise XoptError("Xopt VOCS is not specified")
 
+    def rebuild_from_previous_state(self, index):
+        """rebuild generator from saved history"""
+        if self.options.dump_file is not None:
+            return build_generator_from_saved_state(index, self.options.dump_file)
+
     def dump_state(self):
         """dump data to file"""
         if self.options.dump_file is not None:
@@ -512,8 +517,3 @@ def state_to_dict(X, include_data=True, include_history=False):
         output["history"] = json.loads(X.generator.to_json())
 
     return output
-
-
-def rebuild_from_previous_state(self, index):
-    """rebuild generator from saved history"""
-    return build_generator_from_saved_state(index, self.options.dump_file)
