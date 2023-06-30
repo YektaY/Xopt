@@ -34,7 +34,7 @@ class XoptOptions(XoptBaseModel):
         False, description="flag to evaluate and submit evaluations asynchronously"
     )
     strict: bool = Field(
-        False,
+        True,
         description="flag to indicate if exceptions raised during evaluation "
         "should stop Xopt",
     )
@@ -270,7 +270,7 @@ class Xopt:
             if self.options.strict:
                 if future.exception() is not None:
                     raise future.exception()
-                validate_outputs(outputs)
+                validate_outputs(pd.DataFrame(outputs, index=[1]))
             output_data.append(outputs)
 
         # Special handling of a vectorized futures.
@@ -484,9 +484,7 @@ def xopt_kwargs_from_dict(config: dict) -> dict:
 
     # create generator
     generator_class = get_generator(config["generator"].pop("name"))
-    generator = generator_class.parse_raw(
-        json.dumps({**config["generator"], "vocs": vocs.dict()})
-    )
+    generator = generator_class.parse_obj({**config["generator"], "vocs": vocs.dict()})
 
     # Create evaluator
     evaluator = Evaluator(**config["evaluator"])

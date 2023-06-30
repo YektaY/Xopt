@@ -40,7 +40,7 @@ class BayesianGenerator(Generator, ABC):
         None, description="botorch model used by the generator to perform optimization"
     )
     n_monte_carlo_samples = Field(
-        128, description="number of monte carlo samples to " "use"
+        128, description="number of monte carlo samples to use"
     )
     turbo_controller: TurboController = Field(
         default=None, description="turbo controller for trust-region BO"
@@ -173,7 +173,9 @@ class BayesianGenerator(Generator, ABC):
         if data.empty:
             raise ValueError("no data available to build model")
 
-        _model = self.model_constructor.build_model_from_vocs(self.vocs, data)
+        _model = self.model_constructor.build_model_from_vocs(
+            self.vocs, data, **self._tkwargs
+        )
 
         if update_internal:
             self.model = _model
@@ -204,10 +206,7 @@ class BayesianGenerator(Generator, ABC):
         # apply constraints if specified in vocs
         if len(self.vocs.constraints):
             acq = ConstrainedMCAcquisitionFunction(
-                model,
-                acq,
-                self._get_constraint_callables(),
-                sampler=sampler
+                model, acq, self._get_constraint_callables(), sampler=sampler
             )
 
         return acq
