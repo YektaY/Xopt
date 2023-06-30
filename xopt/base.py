@@ -315,7 +315,9 @@ class Xopt:
     def rebuild_from_previous_state(self, index):
         """rebuild generator from saved history"""
         if self.options.dump_file is not None:
-            return build_generator_from_saved_state(index, self.options.dump_file)
+            return build_generator_from_saved_state(
+                index=index, dump_file=self.options.dump_file
+            )
 
     def dump_state(self):
         """dump data to file"""
@@ -514,6 +516,6 @@ def state_to_dict(X, include_data=True, include_history=False):
         output["data"] = json.loads(X.data.to_json())
 
     if include_history:
-        output["history"] = json.loads(X.generator.to_json())
+        output["history"] = json.loads(X.generator.json())
 
     return output

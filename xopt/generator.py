@@ -46,6 +46,10 @@ class Generator(XoptBaseModel, ABC):
             vocs: The vocs to use.
             options: The options to use.
         """
+        print("start")
+        for key, value in kwargs.items():
+            print(key, value)
+        print("end")
         super().__init__(**kwargs)
         _check_vocs(self.vocs, self.supports_multi_objective)
         logger.info(f"Initialized generator {self.name}")

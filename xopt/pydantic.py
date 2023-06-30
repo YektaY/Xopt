@@ -11,15 +11,7 @@ from typing import Any, Callable, Generic, Iterable, List, Optional, TypeVar
 import numpy as np
 import orjson
 import torch.nn
-from pydantic import (
-    BaseModel,
-    create_model,
-    Extra,
-    Field,
-    parse_obj_as,
-    root_validator,
-    validator,
-)
+from pydantic import BaseModel, create_model, Extra, Field, root_validator, validator
 from pydantic.generics import GenericModel
 
 ObjType = TypeVar("ObjType")
@@ -86,12 +78,6 @@ def recursive_deserialize(v: dict):
                 v[key] = DECODERS[value]
 
     return v
-
-
-def rebuild_from_json(model, json_data):
-    """Method to rebuild a generator from a json file."""
-    rebuilt_generator = parse_obj_as(model, json_data)
-    return rebuilt_generator
 
 
 # define custom json_dumps using orjson

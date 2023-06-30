@@ -1,7 +1,6 @@
 import datetime
 import importlib
 import inspect
-import json
 import sys
 import time
 import traceback
@@ -9,8 +8,11 @@ import traceback
 import pandas as pd
 import torch
 import yaml
+from pydantic import parse_obj_as
 
-from .pydantic import get_descriptions_defaults, rebuild_from_json
+from xopt.generators import get_generator
+
+from .pydantic import get_descriptions_defaults
 from .vocs import VOCS
 
 
@@ -173,17 +175,19 @@ def read_xopt_csv(*files):
     return pd.concat(dfs)
 
 
-def build_generator_from_saved_state(self, index, dump_file):
+def build_generator_from_saved_state(index, dump_file):
     """rebuild generator from saved history"""
     with open(dump_file, "r") as file:
-        data = json.load(file)
+        data = yaml.safe_load(file)
 
-    model = data["generator"]["name"]
-    desired_state = data["history"][index]
+    list_of_saved_generators = data["history"]
+    desired_state = list_of_saved_generators[index]
 
-    generator = rebuild_from_json(model, desired_state)
+    # desired_state['vocs'] = data['vocs']
+    generator_class = get_generator(data["generator"].pop("name"))
+    rebuilt_generator = parse_obj_as(generator_class, desired_state)
 
-    return generator
+    return rebuilt_generator
 
 
 def visualize_model(generator, data, axes=None):
