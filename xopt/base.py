@@ -11,6 +11,7 @@ from xopt.generators import get_generator
 
 # from xopt.generators import get_generator_and_defaults
 from xopt.pydantic import XoptBaseModel
+from xopt.utils import build_generator_from_saved_state
 from xopt.vocs import VOCS
 
 __version__ = _version.get_versions()["version"]
@@ -66,7 +67,8 @@ class Xopt:
         Initialize Xopt object using either a config dictionary or explicitly
 
         Args:
-            config: dict, or YAML or JSON str or file. This overrides all other arguments.
+            config: dict, or YAML or JSON str or file.
+            This overrides all other arguments.
 
             generator: Generator object
             evaluator: Evaluator object
@@ -310,10 +312,17 @@ class Xopt:
         if self.vocs is None:
             raise XoptError("Xopt VOCS is not specified")
 
+    def rebuild_from_previous_state(self, index):
+        """rebuild generator from saved history"""
+        if self.options.dump_file is not None:
+            return build_generator_from_saved_state(
+                index=index, dump_file=self.options.dump_file
+            )
+
     def dump_state(self):
         """dump data to file"""
         if self.options.dump_file is not None:
-            output = state_to_dict(self)
+            output = state_to_dict(self, include_history=True)
             with open(self.options.dump_file, "w") as f:
                 yaml.dump(output, f)
             logger.debug(f"Dumped state to YAML file: {self.options.dump_file}")
@@ -394,7 +403,8 @@ class Xopt:
 
     def __repr__(self):
         """
-        Returns infor about the Xopt object, including the YAML representation without data.
+        Returns infor about the Xopt object,
+        including the YAML representation without data.
         """
         return f"""
             Xopt
@@ -489,7 +499,7 @@ def xopt_kwargs_from_dict(config: dict) -> dict:
     }
 
 
-def state_to_dict(X, include_data=True):
+def state_to_dict(X, include_data=True, include_history=False):
     # dump data to dict with config metadata
     output = {
         "xopt": json.loads(X.options.json()),
@@ -502,5 +512,8 @@ def state_to_dict(X, include_data=True):
     }
     if include_data:
         output["data"] = json.loads(X.data.to_json())
+
+    if include_history:
+        output["history"] = json.loads(X.generator.json())
 
     return output

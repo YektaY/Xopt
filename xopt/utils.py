@@ -8,6 +8,9 @@ import traceback
 import pandas as pd
 import torch
 import yaml
+from pydantic import parse_obj_as
+
+from xopt.generators import get_generator
 
 from .pydantic import get_descriptions_defaults
 from .vocs import VOCS
@@ -170,6 +173,21 @@ def read_xopt_csv(*files):
         df = pd.read_csv(file, index_col="xopt_index")
         dfs.append(df)
     return pd.concat(dfs)
+
+
+def build_generator_from_saved_state(index, dump_file):
+    """rebuild generator from saved history"""
+    with open(dump_file, "r") as file:
+        data = yaml.safe_load(file)
+
+    list_of_saved_generators = data["history"]
+    desired_state = list_of_saved_generators[index]
+
+    # desired_state['vocs'] = data['vocs']
+    generator_class = get_generator(data["generator"].pop("name"))
+    rebuilt_generator = parse_obj_as(generator_class, desired_state)
+
+    return rebuilt_generator
 
 
 def visualize_model(generator, data, axes=None):

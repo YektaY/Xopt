@@ -421,7 +421,8 @@ class NormalExecutor(
 
 
 def get_callable_from_string(callable: str, bind: Any = None) -> Callable:
-    """Get callable from a string. In the case that the callable points to a bound method,
+    """Get callable from a string.
+    In the case that the callable points to a bound method,
     the function returns a callable taking the bind instance as the first arg.
 
     Args:
